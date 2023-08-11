@@ -4,38 +4,37 @@
   import { computed, ref } from "vue"
 
   type ComboBox = {
-    /**
-     * The label of the option. Used to populate the combobox's input when selected
-     */
     label: string;
-    /**
-     * The actual value of the option
-     */
     value: string;
-    /**
-    * Whether the option is disabled
-    */
     disabled?: boolean;
-};
-
-  const comboboxData: ComboBox[] = [
-  { label: "Division 0 of Bronze", value: "0", disabled: false },
-  //...
-]
-
+  };
+  const divisionsInCurrentlySelectedRank = 100000; // replace with actual value
+  const maxVisibleOptions = 100; // Maximum number of options to be rendered in the DOM
+  
+  // Function to find relevant divisions based on user input
+  const findRelevantDivisions = (input: string): ComboBox[] => {
+    // Implement your algorithm here to find relevant divisions based on user input
+    // For now, we just return the first 'maxVisibleOptions' divisions
+    return Array.from({length: maxVisibleOptions}, (_, i) => ({ label: `Division ${i}`, value: `${i}` }));
+  };
+  
+  // Initial comboboxData is empty
+  const comboboxData: ComboBox[] = [];
   const options = ref(comboboxData)
 
   const [state, send] = useMachine(
     combobox.machine({
       id: "combobox",
       onOpen() {
-        options.value = comboboxData
+        options.value = Array.from({length: maxVisibleOptions}, (_, i) => ({ label: `Division ${i}`, value: `${i}` }));
       },
       onInputChange({ value }) {
-        const filtered = comboboxData.filter((item) =>
-          item.label.toLowerCase().includes(value.toLowerCase()),
-        )
-        options.value = filtered.length > 0 ? filtered : comboboxData
+        const index = parseInt(value);
+        if (!isNaN(index) && index >= 0 && index < divisionsInCurrentlySelectedRank) {
+          options.value = [{ label: `Division ${index}`, value: `${index}` }];
+        } else {
+          options.value = []
+        }
       },
     }),
   )
@@ -47,7 +46,7 @@
 
 <template>
   <div v-bind="api.rootProps">
-    <label v-bind="api.labelProps">Select country</label>
+    <label v-bind="api.labelProps">Select Division</label>
 
     <div v-bind="api.controlProps">
       <input v-bind="api.inputProps" />
