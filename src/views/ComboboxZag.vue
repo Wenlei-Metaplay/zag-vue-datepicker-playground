@@ -12,12 +12,20 @@
   const maxVisibleOptions = 100; // Maximum number of options to be rendered in the DOM
   
   // Function to find relevant divisions based on user input
-  const findRelevantDivisions = (input: string): ComboBox[] => {
+  const findRelevantDivisions = (index: number): ComboBox[] => {
     // Implement your algorithm here to find relevant divisions based on user input
     // For now, we just return the first 'maxVisibleOptions' divisions
-    return Array.from({length: maxVisibleOptions}, (_, i) => ({ label: `Division ${i}`, value: `${i}` }));
+    if (index >= 0 && index < divisionsInCurrentlySelectedRank) { // Changed the condition from <= to <
+      return Array.from({length: 11}, (_, i) => {
+        const divisionNumber = index - 5 + i;
+        if (divisionNumber >= 0 && divisionNumber < divisionsInCurrentlySelectedRank) {
+          return { label: `Division ${divisionNumber}`, value: `${divisionNumber}` };
+        }
+      }).filter((item): item is ComboBox => Boolean(item));
+    } else {
+      return [];
+    }
   };
-  
   // Initial comboboxData is empty
   const comboboxData: ComboBox[] = [];
   const options = ref(comboboxData)
@@ -30,8 +38,8 @@
       },
       onInputChange({ value }) {
         const index = parseInt(value);
-        if (!isNaN(index) && index >= 0 && index < divisionsInCurrentlySelectedRank) {
-          options.value = [{ label: `Division ${index}`, value: `${index}` }];
+        if (!isNaN(index)) {
+          options.value = findRelevantDivisions(index)
         } else {
           options.value = []
         }
